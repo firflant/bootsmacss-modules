@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the twitter_block module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+/*
+function waat_block_more_schema() {
+  $schema['waat_block_more'] = array(
+    'description' => 'The table for storing block more link data.',
+    'fields' => array(
+      'bid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => "The block's {block}.bid.",
+      ),
+      'label' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Button label.',
+      ),
+      'url' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Button URL.',
+      ),
+    ),
+    'primary key' => array('bid'),
+  );
+
+  return $schema;
+}
+*/

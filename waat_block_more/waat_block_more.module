@@ -1,0 +1,93 @@
+<?php
+/**
+ * @file
+ * Views news carousel.
+ */
+
+/**
+* Implements hook_form_FORM_ID_alter() for block_admin_configure().
+*/
+function waat_block_more_form_block_admin_configure_alter(&$form, &$form_state, $form_id) {
+  $form['settings']['info']['#weight'] = -18;
+
+  $bid = waat_block_more_get_bid($form['module']['#value'], $form['delta']['#value']);
+
+  $more_buttom_settings['label'] = variable_get($bid . '_extra_label');
+  $more_buttom_settings['url'] = variable_get($bid . '_extra_url');
+
+
+  $form['settings']['more_button'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('More button'),
+    '#description' => t('Optional button near the block title.'),
+    '#weight' => -17,
+  );
+  // Label
+  $form['settings']['more_button']['more_button_label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('More button label'),
+    '#description' => t('Leave empty to not show the link.'),
+    '#default_value' => $more_buttom_settings['label'],
+  );
+  // URL
+  $form['settings']['more_button']['more_button_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('More button URL'),
+    '#default_value' => $more_buttom_settings['url'],
+  );
+  // Block uniqie identifier placeholder
+  $form['settings']['more_button']['bid'] = array(
+    '#type' => 'hidden',
+    '#value' => $bid,
+  );
+  array_unshift($form['#submit'], 'waat_block_more_submit');
+}
+
+/**
+ * Form submission handler.
+ */
+function waat_block_more_submit($form, &$form_state) {
+  $bid = $form['settings']['more_button']['bid']['#value'];
+  $label = $form['settings']['more_button']['more_button_label']['#value'];
+  $url = $form['settings']['more_button']['more_button_url']['#value'];
+
+  if (!empty($label)) {
+    // Save the button configuration.
+    variable_set($bid . '_extra_label', $label);
+    variable_set($bid . '_extra_url', $url);
+  }
+  else {
+    variable_del($bid . '_extra_label');
+    variable_del($bid . '_extra_url');
+  }
+  return TRUE;
+}
+
+/**
+ * Returns block id for default theme with only one simple query.
+ */
+function waat_block_more_get_bid($module, $delta) {
+  $theme = variable_get('theme_default');
+  return db_query(
+    "SELECT bid FROM {block} WHERE module = :module AND delta = :delta AND theme = :theme",
+    array(':module' => $module, ':delta' => $delta, ':theme' => $theme))
+    ->fetchField();
+}
+
+/**
+ * Implements hook_preprocess_block().
+ */
+function waat_block_more_preprocess_block(&$variables) {
+  if (!empty($variables['block']->subject)) {
+    $bid = waat_block_more_get_bid($variables['block']->module, $variables['block']->delta);
+    $more_settings['label'] = variable_get($bid . '_extra_label');
+    $more_settings['url'] = variable_get($bid . '_extra_url');
+
+    if (!empty($more_settings['url'])) {
+      $variables['title_attributes_array']['class'][] = 'title-more';
+      $variables['more'] = l($more_settings['label'], $more_settings['url'], array('attributes' => array(
+        'class' => array('btn', 'btn-primary', 'pull-right'),
+      )));
+    }
+  }
+}

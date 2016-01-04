@@ -1,0 +1,7 @@
+name = WAAT Block More
+description  = Adds views like 'More' link functionality near the block title
+package = "WAAT Components"
+core = 7.x
+project = "EEN"
+
+dependencies[] = block

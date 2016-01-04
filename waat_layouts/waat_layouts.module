@@ -1,0 +1,131 @@
+<?php
+
+/**
+ * @file
+ * Defining Display Suite layouts and view modes.
+ */
+
+/**
+ * Define Display Suite layouts.
+ *
+ * @return array
+ *   A collection of layouts.
+ */
+function waat_layouts_ds_layout_info() {
+  $path = drupal_get_path('module', 'waat_layouts');
+
+  $layouts = array(
+    'contact' => array(
+      'label' => t('WAAT Components: Contact'),
+      'path' => $path . '/ds_layouts',
+      'regions' => array(
+        'contact_header' => t('Header'),
+        'contact_title' => t('Title'),
+        'contact_address' => t('Address section'),
+        'contact_person' => t('Person section'),
+        'contact_mail' => t('Mail section'),
+        'contact_phone' => t('Phone section'),
+        'contact_link' => t('Link section'),
+        'contact_type' => t('Type section'),
+        'contact_footer' => t('Footer'),
+      ),
+    ),
+    'listing_item' => array(
+      'label' => t('WAAT Components: Listing item'),
+      'path' => $path . '/ds_layouts',
+      'regions' => array(
+        'listing_meta' => t('Meta'),
+        'listing_header' => t('Header'),
+        'listing_media' => t('Media'),
+        'listing_body' => t('Body primary'),
+        'listing_body_sidebar' => t('Body sidebar'),
+        'listing_footer' => t('Footer'),
+      ),
+    ),
+    'grid_listing_item' => array(
+      'label' => t('WAAT Components: Grid listing item'),
+      'path' => $path . '/ds_layouts',
+      'regions' => array(
+        'listing_media' => t('Media'),
+        'listing_header' => t('Header'),
+        'listing_body' => t('Body'),
+      ),
+    ),
+    'middle_align_listing_item' => array(
+      'label' => t('WAAT Components: Middle align listing item'),
+      'path' => $path . '/ds_layouts',
+      'regions' => array(
+        'column_first' => t('First column'),
+        'column_second' => t('Second column'),
+        'column_third' => t('Third column'),
+        'column_fourth' => t('Fourth column'),
+      ),
+    ),
+    'single_page' => array(
+      'label' => t('WAAT Components: Single page'),
+      'path' => $path . '/ds_layouts',
+      'regions' => array(
+        'single_page_header' => t('Header'),
+        'single_page_media' => t('Media'),
+        'single_page_body' => t('Body'),
+        'single_page_footer' => t('Footer'),
+        'single_page_footer_second' => t('Footer second'),
+      ),
+    ),
+    'single_page_sidebar' => array(
+      'label' => t('WAAT Components: Single page with sidebar'),
+      'path' => $path . '/ds_layouts',
+      'regions' => array(
+        'single_page_content' => t('Content'),
+        'single_page_postcontent' => t('Post content'),
+        'single_page_sidebar' => t('Sidebar'),
+      ),
+    ),
+    'single_page_sidebar_stacked' => array(
+      'label' => t('WAAT Components: Single page with sidebar stacked'),
+      'path' => $path . '/ds_layouts',
+      'regions' => array(
+        'single_page_top_left' => t('Top sidebar'),
+        'single_page_top' => t('Top'),
+        'single_page_content' => t('Content'),
+        'single_page_sidebar' => t('Sidebar'),
+        'single_page_bottom_left' => t('Bottom left'),
+        'single_page_bottom_right' => t('Bottom right'),
+      ),
+    ),
+  );
+
+  return $layouts;
+}
+
+/**
+ * Implements hook_entity_info_alter().
+ *
+ * Add additional view modes.
+ */
+function waat_layouts_entity_info_alter(&$entity_info) {
+  $entity_info['node']['view modes']['block_teaser'] = array(
+    'label' => t('Block teaser'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['taxonomy_term']['view modes']['teaser'] = array(
+    'label' => t('Teaser'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['taxonomy_term']['view modes']['block_teaser'] = array(
+    'label' => t('Block teaser'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['user']['view modes']['teaser'] = array(
+    'label' => t('Teaser'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['user']['view modes']['block_teaser'] = array(
+    'label' => t('Block teaser'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['file']['view modes']['block_teaser'] = array(
+    'label' => t('Block teaser'),
+    'custom settings' => TRUE,
+  );
+}

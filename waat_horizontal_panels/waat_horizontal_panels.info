@@ -1,0 +1,7 @@
+name = WAAT Horizontal Panels
+description  = "Horizontal Panels view format"
+package = "WAAT Components"
+core = 7.x
+files[] = views_plugin_style_waat_horizontal_panels.inc
+
+dependencies[] = views

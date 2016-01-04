@@ -1,0 +1,82 @@
+<?php
+/**
+ * @file
+ * Views news carousel.
+ */
+
+/**
+ * Implements hook_views_api().
+ */
+function waat_news_carousel_views_api() {
+  return array(
+    'api' => 3,
+  );
+}
+
+/**
+ * Implements template_preprocess_HOOK().
+ */
+function template_preprocess_views_view_news_carousel(&$vars) {
+  $vars['titles'] = array();
+  $path = drupal_get_path('module', 'waat_news_carousel');
+  drupal_add_js($path . '/js/news-carousel.js', array('type' => 'file', 'scope' => 'footer'));
+
+  // Render more button inside the template.
+  $vars['more'] = $_SESSION['waat_news_carousel_more'];
+  unset($_SESSION['waat_news_carousel_more']);
+
+  // Create array of titles
+  foreach ($vars['view']->result as $count => $item) {
+    $node = node_load($item->nid);
+    $vars['titles'][$count] = $node->title;
+  }
+}
+
+/**
+ * Implements template_preprocess_HOOK().
+ */
+function waat_news_carousel_process_views_view(&$vars) {
+  if ($vars['view']->style_plugin->plugin_name == 'waat_news_carousel') {
+    $_SESSION['waat_news_carousel_more'] = $vars['more'];
+    $vars['more'] = NULL;
+  }
+}
+
+/**
+ * Define Display Suite layouts.
+ *
+ * @return array
+ *   A collection of layouts.
+ */
+function waat_news_carousel_ds_layout_info() {
+  $path = drupal_get_path('module', 'waat_news_carousel');
+
+  $layouts = array(
+    'news_carousel' => array(
+      'label' => t('WAAT Component: News carousel item'),
+      'path' => $path,
+      'regions' => array(
+        'title' => t('Title'),
+        'description' => t('Description'),
+        'footer_left' => t('Left footer'),
+        'footer_right' => t('Right footer'),
+        'post_footer' => t('Post footer'),
+        'media' => t('Media'),
+      ),
+    ),
+  );
+
+  return $layouts;
+}
+
+/**
+ * Implements hook_entity_info_alter().
+ *
+ * Add additional view modes.
+ */
+function waat_news_carousel_entity_info_alter(&$entity_info) {
+  $entity_info['node']['view modes']['news_carousel'] = array(
+    'label' => t('Carousel item'),
+    'custom settings' => TRUE,
+  );
+}

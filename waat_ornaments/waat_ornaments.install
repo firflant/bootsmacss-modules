@@ -1,0 +1,55 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the twitter_block module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+/*
+function waat_ornaments_schema() {
+  $schema['waat_ornaments_block'] = array(
+    'description' => 'The table for storing ornaments for block titles data.',
+    'fields' => array(
+      'bid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => "The block's {block}.bid.",
+      ),
+      'ornament' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Ornament color.',
+      ),
+    ),
+    'primary key' => array('bid'),
+  );
+  
+  $schema['waat_ornaments_links'] = array(
+    'description' => 'The table for storing ornaments for block titles data.',
+    'fields' => array(
+      'mlid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => "The menu link ID.",
+      ),
+      'ornament' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Ornament color.',
+      ),
+    ),
+    'primary key' => array('mlid'),
+  );
+
+  return $schema;
+}
+*/

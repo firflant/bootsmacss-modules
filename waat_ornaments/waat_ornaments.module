@@ -1,0 +1,303 @@
+<?php
+/**
+ * @file
+ * Ornaments configuration holding.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function waat_ornaments_menu() {
+  $items = array();
+
+  $items['admin/appearance/ornaments'] = array(
+    'title' => 'Ornaments',
+    'description' => 'Configure colorfull ornaments near the page title for the specific pages.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('waat_ornaments_config_form'),
+    'access arguments' => array('administer blocks'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_form().
+ */
+function waat_ornaments_config_form($form, &$form_state) {
+  $content_types = node_type_get_names();
+  $colors = waat_ornaments_get_colors();
+
+  $form['hint'] = array(
+    '#markup' => t('With this form you can set colorfull ornaments near the page title for the specific pages. There are two methods: by conent type and by UTL. Configuration for blocks and links is done on their settings forms.'),
+  );
+
+  $form['sitewide'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Sitewide settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+
+  $form['sitewide']['waat_ornaments_sitewide'] = array(
+    '#type' => 'select',
+    '#title' => t('Sitewide ornament'),
+    '#description' => t('Set ornament globally for all pages. This value can be overriden by the configuration below.'),
+    '#options' => $colors,
+    '#default_value' => variable_get('waat_ornaments_sitewide', ''),
+  );
+
+  $form['content_types'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Configuration for content types'),
+    '#description' => t('Select the ornament for given content type'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+
+  foreach ($content_types as $key => $value) {
+    $variable = 'waat_ornaments_ct_' . $key;
+    $form['content_types'][$variable] = array(
+      '#type' => 'select',
+      '#title' => $value,
+      '#options' => $colors,
+      '#default_value' => variable_get($variable, ''),
+    );
+  }
+
+  $form['urls'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Configuration for specific URLS'),
+    '#description' => t('Enter URLs of the pages where you want to set ornament in given color, one per line.'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+
+  array_shift($colors);
+
+  foreach ($colors as $key => $value) {
+    $variable = 'waat_ornaments_url_' . $key;
+    $form['urls'][$variable] = array(
+      '#type' => 'textarea',
+      '#title' => t("Pages with @color ornament", array('@color' => $value)),
+      '#rows' => 5,
+      '#default_value' => variable_get($variable, ''),
+    );
+  }
+
+  return system_settings_form($form);
+}
+
+/**
+* Implements hook_form_alter().
+*/
+function waat_ornaments_form_alter(&$form, &$form_state, $form_id) {
+  // Settings for both block and menu item configuration forms.
+  if ($form_id == 'block_admin_configure' OR $form_id == 'menu_edit_item') {
+    $colors = waat_ornaments_get_colors();
+    array_unshift($form['#submit'], 'waat_ornaments_submit');
+  }
+
+  // Settings unique for particular configuration form.
+  switch ($form_id) {
+    case 'block_admin_configure':
+      $form['settings']['info']['#weight'] = -18;
+      $bid = waat_ornaments_get_bid($form['module']['#value'], $form['delta']['#value']);
+      $ornament_setting = waat_ornaments_get_block_settings($bid);
+
+      // Block uniqie identifier placeholder
+      $form['settings']['bid'] = array(
+        '#type' => 'hidden',
+        '#value' => $bid,
+      );
+
+      // Ornament settings
+      $form['settings']['ornament'] = array(
+        '#type' => 'select',
+        '#title' => t('Ornament'),
+        '#description' => t('Optional decoration above the title. Select the color.'),
+        '#default_value' => $ornament_setting,
+        '#options' => $colors,
+        '#weight' => -16,
+      );
+      break;
+
+    case 'menu_edit_item':
+      $form['link_title']['#weight'] = -20;
+      $ornament_setting = waat_ornaments_get_link_settings($form['mlid']['#value']);
+
+      // Ornament settings
+      $form['ornament'] = array(
+        '#type' => 'select',
+        '#title' => t('Ornament'),
+        '#description' => t('Optional decoration above the link. Select the color.'),
+        '#default_value' => $ornament_setting,
+        '#options' => $colors,
+        '#weight' => -19,
+      );
+      break;
+  }
+}
+
+/**
+ * Form submission handler.
+ */
+function waat_ornaments_submit($form, &$form_state) {
+  switch ($form['#form_id']) {
+    case 'block_admin_configure':
+      $ornament = $form['settings']['ornament']['#value'];
+      $bid = $form['settings']['bid']['#value'];
+      if (!empty($ornament)) {
+         variable_set($bid . '_block_ornament', $ornament);
+      }
+      else {
+         variable_del($bid . '_block_ornament');
+      }
+      break;
+
+    case 'menu_edit_item':
+      $ornament = $form['ornament']['#value'];
+      $mlid = $form['mlid']['#value'];
+      if (!empty($ornament)) {
+        // Save the button configuration.
+         variable_set($mlid . '_menu_ornament', $ornament);
+      }
+      else {
+        // If value is empty, delete row from database
+         variable_del($mlid . '_menu_ornament');
+      }
+      break;
+  }
+
+  return TRUE;
+}
+
+/**
+ * Returns array of avaliable colors
+ */
+function waat_ornaments_get_colors() {
+  return array(
+    '' => t('None'),
+    'default' => 'Default',
+    'azure' => 'Azure',
+    'blue' => 'Blue',
+    'blue-dark' => 'Dark blue',
+    'brown' => 'Brown',
+    'gray-light' => 'Light gray',
+    'gray-lighter' => 'Lighter gray',
+    'green' => 'Green',
+    'green-dark' => 'Dark green',
+    'orange' => 'Orange',
+    'white' => 'White',
+  );
+}
+
+/**
+ * Returns block id for default theme with only one simple query.
+ */
+function waat_ornaments_get_bid($module, $delta) {
+  $theme = variable_get('theme_default');
+  return db_query(
+    "SELECT bid FROM {block} WHERE module = :module AND delta = :delta AND theme = :theme",
+    array(':module' => $module, ':delta' => $delta, ':theme' => $theme))
+    ->fetchField();
+}
+
+/**
+ * Returns information from database about ornament for block.
+ */
+function waat_ornaments_get_block_settings($bid) {
+  return variable_get($bid . '_block_ornament');
+}
+
+/**
+ * Returns information from database about ornament for menu link.
+ */
+function waat_ornaments_get_link_settings($mlid) {
+  return variable_get($mlid . '_menu_ornament');
+}
+
+/**
+ * Returns information from database about ornament for given content type.
+ */
+function waat_ornaments_get_ct_settings($content_type) {
+  $ornament_setting = variable_get('waat_ornaments_ct_' . $content_type);
+  $ornament_setting = (empty($ornament_setting)) ? variable_get('waat_ornaments_sitewide', '') : $ornament_setting;
+  return $ornament_setting;
+}
+
+/**
+ * Returns information from database about ornament for given URL.
+ */
+function waat_ornaments_get_url_settings() {
+  $path = current_path();
+  $path_alias = drupal_lookup_path('alias', $path);
+  $path = (!empty($path_alias)) ? $path_alias : $path;
+  $colors = waat_ornaments_get_colors();
+  array_shift($colors);
+
+  foreach ($colors as $color => $value) {
+    $variable = variable_get('waat_ornaments_url_' . $color);
+    if (!empty($variable)) {
+      $urls = explode("\n", $variable);
+      foreach ($urls as $key => $value) {
+        $ornament_setting = (strpos($value, $path) !== FALSE) ? $color : FALSE;
+        return (strpos($value, $path) !== FALSE) ? $color : FALSE;
+      }
+    }
+  }
+  $ornament_setting = (empty($ornament_setting)) ? variable_get('waat_ornaments_sitewide', '') : $ornament_setting;
+  return $ornament_setting;
+}
+
+/**
+ * Implements hook_preprocess_block().
+ */
+function waat_ornaments_preprocess_block(&$variables) {
+  $bid = waat_block_more_get_bid($variables['block']->module, $variables['block']->delta);
+  $ornament_setting = waat_ornaments_get_block_settings($bid);
+
+  $variables['title_prefix'] = waat_ornaments_render($ornament_setting);
+}
+
+/**
+* Implements hook_preprocess_menu_link().
+*/
+function waat_ornaments_preprocess_menu_link(&$variables) {
+  $ornament_setting = waat_ornaments_get_link_settings($variables['element']['#original_link']['mlid']);
+  $variables['element']['#title'] = waat_ornaments_render($ornament_setting) . $variables['element']['#title'];
+  if (!empty($ornament_setting)) {
+    $variables['element']['#localized_options']['html'] = 1;
+  }
+}
+
+function waat_ornaments_preprocess_field(&$variables, $hook) {
+  if ($variables['element']['#view_mode'] == 'full' && $variables['element']['#field_name'] == 'title') {
+    // Check if any ornament is defined for this entity's content type.
+    $ornament_setting = waat_ornaments_get_ct_settings($variables['element']['#object']->type);
+    // If there is no any setting for this content type, use URL method.
+    if (empty($ornament_setting)) {
+
+    }
+    $variables['items'][0]['#markup'] = waat_ornaments_render($ornament_setting) . $variables['items'][0]['#markup'];
+  }
+}
+
+/**
+* Implements hook_preprocess_page().
+*/
+function waat_ornaments_preprocess_page(&$variables) {
+  $ornament_setting = waat_ornaments_get_url_settings();
+  $variables['title_prefix'] = waat_ornaments_render($ornament_setting);
+}
+
+/**
+* Ornament rendering function.
+*/
+function waat_ornaments_render($ornament_setting) {
+  if (!empty($ornament_setting)) {
+    $modifier = ($ornament_setting == 'default') ? '' : ' ornament--' . $ornament_setting;
+    return '<div class="ornament' . $modifier . '"></div>';
+  }
+}

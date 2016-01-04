@@ -1,0 +1,42 @@
+<?php
+/**
+ * @file
+ * Views news carousel.
+ */
+
+/**
+ * Implements hook_views_api().
+ */
+function waat_horizontal_panels_views_api() {
+  return array(
+    'api' => 3,
+  );
+}
+
+/**
+ * Implements template_preprocess_HOOK().
+ */
+function template_preprocess_views_view_horizontal_panels(&$vars) {
+  $vars['titles'] = array();
+
+  // Create array of titles
+  foreach ($vars['view']->result as $count => $item) {
+    $node = node_load($item->nid);
+    $vars['titles'][$count] = $node->title;
+  }
+
+  $path = drupal_get_path('module', 'waat_horizontal_panels');
+  drupal_add_js($path . '/horizontal-panels-states.js', array('scope' => 'footer'));
+}
+
+/**
+ * Implements hook_entity_info_alter().
+ *
+ * Add additional view modes.
+ */
+function waat_horizontal_panels_entity_info_alter(&$entity_info) {
+  $entity_info['node']['view modes']['horizontal_panels'] = array(
+    'label' => t('Horizontal Panels'),
+    'custom settings' => TRUE,
+  );
+}

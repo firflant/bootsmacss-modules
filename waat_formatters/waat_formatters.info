@@ -1,0 +1,4 @@
+name = WAAT Formatters
+description  = "WAAT Web Components styleguide field formmatters"
+package = "WAAT Components"
+core = 7.x

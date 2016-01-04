@@ -1,0 +1,7 @@
+name = WAAT News Carousel
+description  = "News Carousel view format"
+package = "WAAT Components"
+core = 7.x
+files[] = views_plugin_style_waat_news_carousel.inc
+
+dependencies[] = views

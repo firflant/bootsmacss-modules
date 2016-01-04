@@ -1,0 +1,6 @@
+name = WAAT Layouts
+description  = "Display Suite layouts and view modes according to WAAT Web Components styleguide"
+package = "WAAT Components"
+core = 7.x
+
+dependencies[] = ds

@@ -1,0 +1,10 @@
+name = WAAT Ornaments
+description  = Allows user to configure ornaments for menu links and block titles
+package = "WAAT Components"
+core = 7.x
+project = "EEN"
+configure = admin/appearance/ornaments
+
+dependencies[] = block
+dependencies[] = menu
+dependencies[] = waat_block_more
